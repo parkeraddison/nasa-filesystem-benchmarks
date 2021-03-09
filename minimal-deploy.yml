@@ -1,0 +1,41 @@
+# Minimal deployment
+# ==================
+#
+# Launch a very minimal pod connect to a storage mount.
+#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: filebench
+spec:
+  selector:
+    matchLabels:
+      app: filebench
+  template:
+    metadata:
+      labels:
+        app: filebench
+    spec:
+      containers:
+      - name: filebench
+        image: ubuntu:latest
+        resources:
+          limits:
+            memory: "4Gi"
+            cpu: "1"
+          requests:
+            memory: "2Gi"
+            cpu: "1"
+        ports:
+        - containerPort: 80
+        tty: true
+        command: [/bin/sh]
+        args: [-c, sleep infinity]
+# --- Change the lines below to test different storage types ----------------- #
+        volumeMounts:
+          - name: filebench-block
+            mountPath: /storage
+      volumes:
+      - name: filebench-block
+        persistentVolumeClaim:
+          claimName: filebench-block
