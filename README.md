@@ -1,129 +1,57 @@
 # filesystem-benchmarks
 
-## Deploy
-```
-k create -f volumes/block.yml
-k create -f minimal-deploy.yml
-```
+[![Development notes are in the wiki](https://img.shields.io/badge/notes-in%20wiki-success)](https://gitlab.nautilus.optiputer.net/parkeraddison/filesystem-benchmarks.wiki.git)
 
-## Installing
+This repository contains code to support running filesystem benchmarks on the PRP's Nautilus cluster and on the NAS Division's HPC environment.
 
-These commands are run in the pod.
+**Table of Contents**
 
-Dependencies. See: https://github.com/hpc/ior/blob/main/testing/docker/ubuntu16.04/Dockerfile
 
+
+## Nautilus
+
+Nautilus uses a Kubernetes cluster so to run a benchmark the process is:
+1. Create a volume with the desired filesystem (e.g. Ceph block, POSIX, S3, etc)
+2. Create a deployment with an image that has all benchmark software installed and mount it to the desired volume
+3. Run the benchmark
+4. ???
+5. Profit
+
+You will need to be a member of a namespace to do anything. See https://nautilus.optiputer.net
+
+### Volumes
+
+A simple Rook Ceph Block filesystem is defined in `volumes/block.yml`.
+
+To deploy it on Nautilus, run
 ```
-apt-get update
-apt-get install -y libopenmpi-dev openmpi-bin mpich git pkg-config gcc git vim less curl wget
-apt-get install -y sudo
-```
-
-Configuration. See `./configure --help`.
-
-```
-./configure
-```
-
-Installation
-```
-make
-```
-
-<!-- 
-This didn't seem to work!
-
-I think there's now supposed to be an IOR file that I can run.
-
-Ah, there is one in `src`...
- -->
-
-## Running
-
-See: https://ior.readthedocs.io/en/latest/userDoc/tutorial.html
-
-```
-cd src
-./ior ...
-```
-or
-```
-mpirun ...
-```
-<!-- 
-Not sure how to really use it yet.
-
-When I run ior it does a test instantly it seems.
-
-When I tried doing
-```
-mpirun -n 64 ./ior -t 1m -b 16m -s 16
-```
-I got a ton of:
-```
-ior ERROR: open64("testFile", 66, 0664) failed, errno 13, Permission denied (aiori-POSIX.c:412)
-...
-[filebench-574869c787-pdn62:07749] PMIX ERROR: UNREACHABLE in file ../../../src/server/pmix_server.c at line 2193
-...
+kubectl create -f volumes/block.yml
 ```
 
-Also note that I ran `useradd testu` and `su testu` because MPIrun doesn't want to be run as a root user. But this user has no permissions! I think that's the issue.
+### Deployment
 
-Seems like a `chmod -R 777 .` as the root fixed this!
--->
+A simple deployment mounted to the ceph block filesystem is defined in `minimal-deploy.yml`.
 
-For example, run 10 tasks with a transfer size of 1m(egabyte?), a block size of 16m(egabyte?), and a segment count of 16:
+The image used should be capable of running the desired benchmarks, such as [IOR][ior] or [FIO][fio].
+
+To deploy, run
 ```
-mpirun -n 10 ./src/ior -t 1m -b 16m -s 16
+kubectl create -f minimal-deploy.yml
 ```
 
-<details>
-    <summary>
-        Output:
-    </summary>
+### Images
 
-```raw
-IOR-3.3.0: MPI Coordinated Test of Parallel I/O
-Began               : Mon Mar  8 23:08:17 2021
-Command line        : ./src/ior -t 1m -b 16m -s 16
-Machine             : Linux filebench-574869c787-pdn62
-TestID              : 0
-StartTime           : Mon Mar  8 23:08:17 2021
-Path                : /storage/ior-3.3.0
-FS                  : 8.0 GiB   Used FS: 0.5%   Inodes: 4.0 Mi   Used Inodes: 0.0%
-
-Options: 
-api                 : POSIX
-apiVersion          : 
-test filename       : testFile
-access              : single-shared-file
-type                : independent
-segments            : 16
-ordering in a file  : sequential
-ordering inter file : no tasks offsets
-nodes               : 1
-tasks               : 10
-clients per node    : 10
-repetitions         : 1
-xfersize            : 1 MiB
-blocksize           : 16 MiB
-aggregate filesize  : 2.50 GiB
-
-Results: 
-
-access    bw(MiB/s)  IOPS       Latency(s)  block(KiB) xfer(KiB)  open(s)    wr/rd(s)   close(s)   total(s)   iter
-------    ---------  ----       ----------  ---------- ---------  --------   --------   --------   --------   ----
-write     678.06     678.07     0.118931    16384      1024.00    0.770489   3.78       3.59       3.78       0   
-read      4233       4234       0.019146    16384      1024.00    0.000035   0.604695   0.298354   0.604706   0   
-remove    -          -          -           -          -          -          -          -          3.20       0   
-Max Write: 678.06 MiB/sec (711.00 MB/sec)
-Max Read:  4233.46 MiB/sec (4439.11 MB/sec)
-
-Summary of all tests:
-Operation   Max(MiB)   Min(MiB)  Mean(MiB)     StdDev   Max(OPs)   Min(OPs)  Mean(OPs)     StdDev    Mean(s) Stonewall(s) Stonewall(MiB) Test# #Tasks tPN reps fPP reord reordoff reordrand seed segcnt   blksiz    xsize aggs(MiB)   API RefNum
-write         678.06     678.06     678.06       0.00     678.06     678.06     678.06       0.00    3.77548         NA            NA     0     10  10    1   0     0        1         0    0     16 16777216  1048576    2560.0 POSIX      0
-read         4233.46    4233.46    4233.46       0.00    4233.46    4233.46    4233.46       0.00    0.60471         NA            NA     0     10  10    1   0     0        1         0    0     16 16777216  1048576    2560.0 POSIX      0
-Finished            : Mon Mar  8 23:08:25 2021
+Various images are defined in `Dockerfile.*` and can be built with
 ```
-</details>
+docker build -t <repo/image_name>:<tag> -f Dockerfile.<name>
+```
+
+The current list of images:
+- `io500` -- Dependencies to run IOR and IO500 tests
+- `fio` -- Dependencies to run FIO tests; built on top of `io500`
 
 
+<!-- Links -->
+[ior]: https://github.com/hpc/ior
+[fio]: https://fio.readthedocs.io/en/latest/fio_doc.html#job-file-format
+[io500]: https://www.vi4io.org/io500/

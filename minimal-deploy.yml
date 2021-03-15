@@ -18,19 +18,19 @@ spec:
     spec:
       containers:
       - name: filebench
-        image: ubuntu:latest
+        image: parkeraddison/io500
         resources:
           limits:
-            memory: "4Gi"
-            cpu: "1"
+            memory: "8Gi"
+            cpu: "2"
           requests:
-            memory: "2Gi"
-            cpu: "1"
+            memory: "4Gi"
+            cpu: "2"
         ports:
         - containerPort: 80
         tty: true
         command: [/bin/sh]
-        args: [-c, sleep infinity]
+        args: [-c, sleep 999d]
 # --- Change the lines below to test different storage types ----------------- #
         volumeMounts:
           - name: filebench-block

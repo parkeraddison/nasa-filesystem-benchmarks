@@ -1,0 +1,11 @@
+# FIO + IO500 Dockerfile
+# ======================
+#
+# Based on the IO500 image and additionally includes dependencies for the FIO
+# benchmark.
+#
+FROM parkeraddison/io500:alpine
+
+# /\/\/\/\
+# TODO: See notes to find necessary dependencies.
+# \/\/\/\/

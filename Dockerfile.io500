@@ -1,0 +1,57 @@
+# IOR Minimal Dockerfile
+# ======================
+#
+# Simply meant to install some the (new) needed dependencies for ior.
+#
+# Adopted from https://github.com/joshuarobinson/docker_ior_mpi/
+#
+
+# Starting out with a minimal image that has MPI installed
+FROM nlknguyen/alpine-mpich
+
+# Install additional IOR dependencies for building and running
+RUN sudo apk add --no-cache \
+    autoconf \
+    automake \
+    bash \
+    curl \
+    git \
+    openssh
+
+# Clone in the IOR repo, build, and install
+RUN git clone https://github.com/hpc/ior.git  && \
+    cd ior && \
+    ./bootstrap && \
+    ./configure && \
+    make && \
+    sudo make install
+
+# Remove the password from the mpi user
+USER root
+RUN passwd -u mpi
+
+# We'll use the non-root user for mpi commands otherwise we get a warning
+USER mpi
+
+# Clone in the IO500 repo and initialize
+RUN git clone https://github.com/IO500/io500.git && \
+    cd io500 && \
+    ./prepare.sh && \
+    make
+
+# Show all possible configuration values and test
+RUN cd io500 && \
+    ./io500 --list > config-all.ini && \
+    ./io500 config-all.ini --dry-run
+
+# Don't really know what's going on here... looks like some values are just
+# being automatically assigned in the config file. Ignoring for now.
+# RUN sed -i 's/datadir = .\/datafiles/datadir = \/datafiles\/io500/g' io500/config-all.ini
+# RUN sed -i 's/posix.odirect =/posix.odirect = TRUE/g' io500/config-all.ini
+# RUN sed -i 's/verbosity = 1/verbosity = 0/g' io500/config-all.ini
+# RUN sed -i 's/resultdir = .\/results/resultdir = \/project\/results\//g' io500/config-all.ini
+# RUN cat io500/config-all.ini
+
+# Additional quality of life packages
+RUN sudo apk add \
+    vim
