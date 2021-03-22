@@ -1,11 +1,10 @@
-# Nautilus
+Nautilus
+========
 
 Nautilus uses a Kubernetes cluster so to run a benchmark the process is:
 1. Create a volume with the desired filesystem (e.g. Ceph block, POSIX, S3, etc)
 2. Create a deployment with an image that has all benchmark software installed and mount it to the desired volume
-3. Run the benchmark
-4. ???
-5. Profit
+3. Execute the command to run a benchmark directly on a pod
 
 You will need to be a member of a namespace to do anything. See https://nautilus.optiputer.net
 
