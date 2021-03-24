@@ -7,6 +7,6 @@ module load mpi-sgi mpi-hpcx comp-intel
 
 cd "$PBS_O_WORKDIR/ior-3.3.0"
 
-# Should write and read a total of 2gb (8 procs * 16 segments of * 16mb)
-mpirun -np 8 ./src/ior -t 1m -b 16m -s 16
+# Writes and reads 1mebibyte of data per processor
+mpirun -np 8 ./src/ior
 
