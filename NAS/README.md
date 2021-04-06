@@ -75,12 +75,12 @@ PBS set the following environment variables:
         FORT_BUFFERED = 1
                    TZ = PST8PDT
 
-On r301i1n10:
+On *****:
 Current directory is /nobackup/paddison
 IOR-3.3.0: MPI Coordinated Test of Parallel I/O
 Began               : Sat Mar 27 15:44:43 2021
 Command line        : /home6/paddison/ior-3.3.0/src/ior
-Machine             : Linux r301i1n10
+Machine             : Linux *****
 TestID              : 0
 StartTime           : Sat Mar 27 15:44:43 2021
 Path                : /nobackupp12/paddison
@@ -132,7 +132,7 @@ Job Resource Usage Summary for 10864291.pbspl1.nas.nasa.gov
     Walltime Requested       : 02:00:00
 
     Execution Queue          : devel
-    Charged To               : g1119
+    Charged To               : *****
 
     Job Stopped              : Sat Mar 27 15:44:47 2021
 ____________________________________________________________________
