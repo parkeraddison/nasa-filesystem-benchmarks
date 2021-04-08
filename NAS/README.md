@@ -17,6 +17,7 @@ Additionally, a script can specify `qsub` options, also known as PBS directives 
 
 The following scripts are currently included in this directory:
 - `ior-atloc.sh` -- loads dependencies and runs a small IOR test starting in whichever directory the `qsub` command was run from.
+- `ior-sweep.sh` -- runs multiple IOR tests sweeping over a single parameter specified in `parameter_sweep.py`. Uses whichever directory the `qsub` command was run from.
 
 ## Running
 
@@ -34,7 +35,7 @@ cd ~
 ```
 then submit the IOR job
 ```bash
-qsub ~/path/to/ior-atloc.sh
+qsub ~/path/to/ior-script.sh
 ```
 
 ### On Lustre
@@ -45,8 +46,14 @@ cd ~/nobackup/$USER
 ```
 then submit the job
 ```bash
-qsub ~/path/to/ior-atloc.sh
+qsub ~/path/to/ior-script.sh
 ```
+
+### Parameter sweep configuration
+
+For now, edit `parameter_sweep.py` or create a new copy in the directory you want to run the test in. At the bottom, you can specify the parameter you want to sweep over in the call to the `sweep` function.
+
+**Note:** This will change and proper configuration will be provided in the future.
 
 ### Checking the status of your job
 
@@ -139,4 +146,17 @@ ____________________________________________________________________
 ```
 
 </details>
+
+### Parsing and visualizing output
+
+The functions provided in `../ior/parse_output.py` can be used to quickly parse and plot the output ('o') files resulting from an IOR test or parameter sweep run as a PBS job. The following code loads in the data and plots a desired value versus the swept parameter.
+```python
+from parse_output.py import *
+
+# Parse the data into a table (DataFrame)
+data = extract_runs('path/to/IOROutput.o...')
+# Plot read and write performance values versus the swept parameter
+# (in this case, mean operations per second versus number of concurrent tasks)
+fig, ax = make_plot(data, 'tasks', 'OPsMean')
+```
 
