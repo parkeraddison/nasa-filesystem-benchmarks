@@ -1,6 +1,6 @@
 ; See: https://fio.readthedocs.io/en/latest/fio_doc.html#job-file-format
 [global]
-rw=randread
+rw=randrw
 size=128m
 
 [job1]
