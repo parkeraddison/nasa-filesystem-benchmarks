@@ -1,0 +1,14 @@
+{
+    "param": "t",
+    "start": 0,
+    "end": 9,
+    "logbase": 4,
+    "unit": "k",
+    "options": {
+        "a": "MPIIO",
+        "i": 5,
+        "b": "512m",
+        "s": 1,
+        "N": 8
+    }
+}

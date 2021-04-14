@@ -2,8 +2,7 @@
 IOR Output Parsing
 ==================
 
-Parses the PBS output file resulting from multiple IOR runs and facilitates
-comparing/plotting the performance of the runs.
+Parses the PBS output file resulting from multiple IOR runs
 """
 
 import itertools
@@ -42,10 +41,11 @@ def extract_runs(fp, to_df=True):
     else:
         return dicts
 
-def make_plot(data, param, value):
+def make_plot(data, param, value, errors=None):
     """
     Plots the read and write performance of some value over a shared parameter.
-    Returns the fig, ax.
+    Returns the fig, ax. `errors` can be specified to a std feature to add
+    error bars.
     
     Possible params: 'segmentCount', 'blockSize', 'transferSize', 'numTasks',
         'tasksPerNode'
@@ -63,13 +63,19 @@ def make_plot(data, param, value):
     ax.set_ylabel(value)
 
     color = 'tab:blue'
-    ax.plot(read[param], read[value], color=color, label='Read')
+    if errors:
+        ax.errorbar(read[param], read[value], read[errors], color=color, label='Read')        
+    else:
+        ax.plot(read[param], read[value], color=color, label='Read')
     ax.tick_params(axis='y', labelcolor=color)
 
     color = 'tab:orange'
     # We want to share the x axis but have a secondary y axis for write values
     ax2 = ax.twinx()
-    ax2.plot(write[param], write[value], color=color, label='Write')
+    if errors:
+        ax2.errorbar(write[param], write[value], write[errors], color=color, label='Write')
+    else:
+        ax2.plot(write[param], write[value], color=color, label='Write')
     ax2.tick_params(axis='y', labelcolor=color)
 
     # Place the legend underneath the figure
@@ -100,4 +106,3 @@ def rescale_x(fig, ax, factor=1/BYTES_PER_MEBIBYTE, logbase=2):
         
     return fig, ax
     
-

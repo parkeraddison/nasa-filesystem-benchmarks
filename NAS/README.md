@@ -51,9 +51,12 @@ qsub ~/path/to/ior-script.sh
 
 ### Parameter sweep configuration
 
-For now, edit `parameter_sweep.py` or create a new copy in the directory you want to run the test in. At the bottom, you can specify the parameter you want to sweep over in the call to the `sweep` function.
+To run a parameter sweep, create a job json as seen in [`/ior`](/ior) and submit `ior-sweep.sh` with an environment variable named IORFILE which points to that jobfile. Optionally override PBS directives (the queue, the number of resources selected, the job name, etc).
 
-**Note:** This will change and proper configuration will be provided in the future.
+For example, the following command will submit a job from a make-believe job json in the current directory, while also changing the PBS job name and resource selection.
+```bash
+qsub -v IORFILE=$(pwd)/make-believe.json -N MakeBelieveName -l select=1:ncpus=1:mpiprocs=1:model=bro ~/path/to/ior-sweep.sh
+```
 
 ### Checking the status of your job
 

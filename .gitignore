@@ -1,5 +1,12 @@
 # Added by noteful
 /.Notes.md.bak
 /.wiki/
-# Added by noteful
 /Notes.md
+
+# Mac
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+

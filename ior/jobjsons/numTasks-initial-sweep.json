@@ -1,0 +1,16 @@
+{
+    "param": "N",
+    "start": 3,
+    "end": 7,
+    "logbase": 2,
+    "options": {
+        "a": "MPIIO",
+        "i": 5,
+        "b": "512m",
+        "t": "128k",
+        "s": 1,
+        "flags": [
+            "C"
+        ]
+    }
+}
