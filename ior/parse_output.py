@@ -72,6 +72,7 @@ def make_plot(data, param, value, errors=None):
     color = 'tab:orange'
     # We want to share the x axis but have a secondary y axis for write values
     ax2 = ax.twinx()
+    
     if errors:
         ax2.errorbar(write[param], write[value], write[errors], color=color, label='Write')
     else:
@@ -83,26 +84,51 @@ def make_plot(data, param, value, errors=None):
 
     fig.suptitle('{value} versus {param}'.format(value=value, param=param));
 
-    return fig, ax
+    return fig, (ax, ax2)
 
-def rescale_x(fig, ax, factor=1/BYTES_PER_MEBIBYTE, logbase=2):
+def rescale_axis(fig, axes, axis='x', factor=1, logbase=None, lim=None, sharey=False):
     """
     Parameters
     ----------
-    factor : scalar, default 1/BYTES_PER_MEBIBYTE
-        Factor to linearly scale the x axis by. If None, no linear scaling will
+    axis : str, 'x' or 'y', default 'x'
+        The axis to rescale.
+    factor : scalar, default 1
+        Factor to linearly scale the axis by. If None, no linear scaling will
         be done.
-    logbase : scalar, default 2
-        Base to logarithmically scale the x axis by. If None, no log scaling
+    logbase : scalar, default None
+        Base to logarithmically scale the axis by. If None, no log scaling
         will be done.
+    lim : tuple, default None
+        Specific limits to set on the axis. Will be scaled by the inverse of
+        `factor`.
+    sharey : boolean, default False
+        Whether to make the two y-axes shared. Only applies if axis='y'.
     """
 
     if logbase:
-        ax.set_xscale('log', base=logbase)
+        if axis == 'x':
+            axes[0].set_xscale('log', base=logbase)
+        elif axis == 'y':
+            axes[0].set_yscale('log', base=logbase)
 
     if factor:
         ticks = matplotlib.ticker.FuncFormatter(lambda x, pos: '{0:g}'.format(x*factor))
-        ax.xaxis.set_major_formatter(ticks)
+        if axis == 'x':
+            axes[0].xaxis.set_major_formatter(ticks)
+        elif axis == 'y':
+            axes[0].yaxis.set_major_formatter(ticks)
         
-    return fig, ax
     
+    if axis == 'y' and sharey:
+        axes[0].get_shared_y_axes().join(*axes)
+        
+    if lim:
+        if axis == 'x':
+            axes[0].set_xlim(*[li/factor for li in lim])
+        elif axis == 'y':
+            for a in axes:
+                a.set_ylim(*[li/factor for li in lim])
+        
+    return fig, axes
+
+

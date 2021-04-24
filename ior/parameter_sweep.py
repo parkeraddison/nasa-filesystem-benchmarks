@@ -33,6 +33,7 @@ DEFAULTS = {
     },
     'flags': [
         'w', 'r', # perform both a write and read test
+        'E', # Use the existing file. NOTE: Assumes a file already exists with the Lustre stripe count set. A workaround for IOR Lustre directives not currently working
     ]
 }
 
@@ -89,6 +90,7 @@ def sweep(param, start=None, end=None, steps=None, logbase=None, unit='', values
 
     ## Time to actually execute the sweep
 
+    # TODO: Default flags and directions should also recursively be inherited
     opts = {**DEFAULTS, **options}
     directives = opts.pop('directives')
     flags = opts.pop('flags')
@@ -123,16 +125,20 @@ def sweep(param, start=None, end=None, steps=None, logbase=None, unit='', values
             *opt_list # All other options specified
         ]
         print('Command: {:s}\n'.format(' '.join(cmd)))
+        #/\/\/\/\/\
+        #! NOTE: THIS IS TEMPORARY TO SET STRIPE COUNT UNTIL IT IS FORMALIZED
+        Popen(['lfs', 'setstripe', '-c', str(min(int(mpiprocs),16)), 'testFile'])
+        #\/\/\/\/\/
         process = Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         # Then wait for it to complete
         process.wait()
-      
+        
         # Finally log the stdout and stderr
         o = process.stdout.read().decode()
         print(o)
         e = process.stderr.read().decode()
         print(e)
-      
+        
         # If it exited non-zero, we should exit, too
         if process.returncode != 0:
             raise Exception('Non-zero exit code {} seen above, exiting.'.format(process.returncode))
