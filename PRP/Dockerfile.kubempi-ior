@@ -1,0 +1,10 @@
+FROM everpeace/kube-openmpi:0.7.0
+
+# Download and extract IOR, then configure and install
+WORKDIR /home
+RUN wget -O- https://github.com/hpc/ior/releases/download/3.3.0/ior-3.3.0.tar.gz \
+    | tar zxf - && \
+    cd ior-3.3.0 && \
+    ./configure && \
+    make && \
+    make install

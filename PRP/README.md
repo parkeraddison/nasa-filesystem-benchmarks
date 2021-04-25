@@ -21,7 +21,7 @@ kubectl create -f volumes/block.yml
 
 A simple deployment mounted to the ceph block filesystem is defined in `minimal-deploy.yml`.
 
-The image used should be capable of running the desired benchmarks, such as [IOR][ior] or [FIO][fio].
+The image used should be capable of running the desired benchmarks, such as [IOR] or [FIO].
 
 To deploy, run
 ```
@@ -38,9 +38,36 @@ docker build -t <repo/image_name>:<tag> -f Dockerfile.<name>
 The current list of images:
 - `io500` -- Dependencies to run IOR and IO500 tests
 - `fio` -- Dependencies to run FIO tests; built on top of `io500`
+- `kube-openmpi-ior` -- The image used [kube-openmpi] with IOR installed
 
+## MPI jobs
+
+To support running multi-node MPI jobs on the Nautilus cluster, we're using [everpeace/kube-openmpi][kube-openmpi].
+
+### Setup
+
+1. Install [Helm](https://helm.sh/docs/intro/quickstart/)
+2. Clone kube-openmpi and in the directory run `./gen-ssh-key.sh`
+3. Edit `values.yaml` with your desired image and resource requests
+4. Add the rolebinding
+  ```sh
+  KUBE_NAMESPACE=my_namespace
+  kubectl create -n $KUBE_NAMESPACE -f https://gitlab.com/ucsd-prp/prp_k8s_config/-/raw/master/mpi/rolebindings.yaml
+  ```
+5. Generate the kube resource yamls and deploy them on the cluster
+  ```sh
+  helm template nautilus chart -n $KUBE_NAMESPACE -f values.yaml -f ssh-key.yaml | kubectl -n $KUBE_NAMESPACE create -f -
+  ```
+
+### Running
+
+Once all pods are running, you can use `kubectl exec` to run `mpiexec` from the master node.
+```sh
+kubectl exec -it nautilus-master -- mpiexec --allow-run-as-root --hostfile /kube-openmpi/generated/hostfile --display-map -n 4 -npernode 1 ior
+```
 
 <!-- Links -->
 [ior]: https://github.com/hpc/ior
 [fio]: https://fio.readthedocs.io/en/latest/fio_doc.html#job-file-format
 [io500]: https://www.vi4io.org/io500/
+[kube-openmpi]: https://github.com/everpeace/kube-openmpi
