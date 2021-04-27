@@ -1,0 +1,3 @@
+[submodule "PRP/kube-openmpi"]
+	path = PRP/kube-openmpi
+	url = https://github.com/everpeace/kube-openmpi.git

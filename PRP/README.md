@@ -57,6 +57,8 @@ To support running multi-node MPI jobs on the Nautilus cluster, we're using [eve
 5. Generate the kube resource yamls and deploy them on the cluster
   ```sh
   helm template nautilus chart -n $KUBE_NAMESPACE -f values.yaml -f ssh-key.yaml | kubectl -n $KUBE_NAMESPACE create -f -
+  # or, while working directory is PRP/
+  make openmpi
   ```
 
 ### Running

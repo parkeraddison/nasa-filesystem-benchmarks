@@ -1,0 +1,13 @@
+# Shared CephFS storage
+# =====================
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: shared-cephfs
+spec:
+  storageClassName: rook-cephfs
+  resources:
+    requests:
+      storage: 50Gi
+  accessModes:
+  - ReadWriteMany
