@@ -1,0 +1,13 @@
+# Shared SeaweedFS storage
+# ========================
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: shared-seaweedfs
+spec:
+  storageClassName: seaweedfs-storage
+  resources:
+    requests:
+      storage: 100Gi
+  accessModes:
+  - ReadWriteMany

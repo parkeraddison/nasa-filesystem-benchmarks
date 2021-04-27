@@ -44,12 +44,13 @@ mpiMaster:
   tolerations: []
   affinity: {}
   volumes:
-    - name: shared-cephfs
+    # NOTE: Change all name occurences to change filesystem being used
+    - name: shared-seaweedfs
       persistentVolumeClaim:
-        claimName: shared-cephfs
+        claimName: shared-seaweedfs
   volumeMounts:
     - mountPath: /shared
-      name: shared-cephfs
+      name: shared-seaweedfs
 
 mpiWorkers:
   num: 3
@@ -75,12 +76,12 @@ mpiWorkers:
   tolerations: []
   affinity: {}
   volumes:
-    - name: shared-cephfs
+    - name: shared-seaweedfs
       persistentVolumeClaim:
-        claimName: shared-cephfs
+        claimName: shared-seaweedfs
   volumeMounts:
     - mountPath: /shared
-      name: shared-cephfs
+      name: shared-seaweedfs
 
 appCodesToSync:
 # - name: chainermn
