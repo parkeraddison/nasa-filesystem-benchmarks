@@ -6,26 +6,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: filebench
+  name: deploy-seaweedfs
 spec:
   selector:
     matchLabels:
-      app: filebench
+      app: deploy-seaweedfs
   template:
     metadata:
       labels:
-        app: filebench
+        app: deploy-seaweedfs
     spec:
       containers:
-      - name: filebench
-        image: parkeraddison/io500
+      - name: container-seaweedfs
+        image: parkeraddison/kube-openmpi-ior
         resources:
           limits:
             memory: "8Gi"
-            cpu: "2"
+            cpu: "8"
           requests:
-            memory: "4Gi"
-            cpu: "2"
+            memory: "8Gi"
+            cpu: "8"
         ports:
         - containerPort: 80
         tty: true
@@ -33,9 +33,12 @@ spec:
         args: [-c, sleep 999d]
 # --- Change the lines below to test different storage types ----------------- #
         volumeMounts:
-          - name: filebench-block
+          - name: shared-seaweedfs
             mountPath: /storage
       volumes:
-      - name: filebench-block
+      - name: shared-seaweedfs
         persistentVolumeClaim:
-          claimName: filebench-block
+          claimName: shared-seaweedfs
+# --- Specify node selection/affinities here --------------------------------- #
+      nodeSelector:
+        topology.kubernetes.io/zone: ucsd

@@ -5,7 +5,6 @@ IOR Output Parsing
 Parses the PBS output file resulting from multiple IOR runs
 """
 
-import itertools
 import json
 import matplotlib.pyplot as plt
 import matplotlib.ticker
@@ -13,13 +12,31 @@ import numpy as np
 import pandas as pd
 import re
 
-from io import StringIO
+KIBI = 1024
+MEBI = 1024**2
+GIBI = 1024**3
 
-BYTES_PER_MEBIBYTE = 1024**2
+def parse_ior(fp, summary=True, print_elapsed=True):
+    """
+    Parses an IOR output file which may contain multiple tests.
+    """
+    with open(fp, 'r') as infile:
+        data = json.load(infile)
+     
+    if print_elapsed:
+        elapsed = (
+            pd.to_datetime(data['Finished']) - pd.to_datetime(data['Began'])
+        )
+        print(elapsed)
+    
+    if summary:
+        return pd.DataFrame.from_dict(data['summary'])
+    else:
+        return data
 
 def extract_runs(fp, to_df=True):
     """
-    Extracts IOR run JSONs from a file and parses them as Python dictionaries
+    Extracts IOR run JSONs from a stdout file and parses them as Python dicts
     and optionally returns the summaries as DataFrames.
     """
     
@@ -41,7 +58,7 @@ def extract_runs(fp, to_df=True):
     else:
         return dicts
 
-def make_plot(data, param, value, errors=None):
+def make_plot(data, param, value, errors=None, xsep=0.02):
     """
     Plots the read and write performance of some value over a shared parameter.
     Returns the fig, ax. `errors` can be specified to a std feature to add
@@ -61,12 +78,15 @@ def make_plot(data, param, value, errors=None):
 
     ax.set_xlabel(param)
     ax.set_ylabel(value)
+    
+    #! NOTE: Shifting by multiplying by small amount...
+    XMULT=xsep/2
 
     color = 'tab:blue'
     if errors:
-        ax.errorbar(read[param], read[value], read[errors], color=color, label='Read')        
+        ax.errorbar(read[param]*(1+XMULT), read[value], read[errors], color=color, label='Read')        
     else:
-        ax.plot(read[param], read[value], color=color, label='Read')
+        ax.plot(read[param]*(1+XMULT), read[value], color=color, label='Read')
     ax.tick_params(axis='y', labelcolor=color)
 
     color = 'tab:orange'
@@ -74,9 +94,9 @@ def make_plot(data, param, value, errors=None):
     ax2 = ax.twinx()
     
     if errors:
-        ax2.errorbar(write[param], write[value], write[errors], color=color, label='Write')
+        ax2.errorbar(write[param]*(1-XMULT), write[value], write[errors], color=color, label='Write')
     else:
-        ax2.plot(write[param], write[value], color=color, label='Write')
+        ax2.plot(write[param]*(1-XMULT), write[value], color=color, label='Write')
     ax2.tick_params(axis='y', labelcolor=color)
 
     # Place the legend underneath the figure

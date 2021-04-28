@@ -1,3 +1,6 @@
+# Ignore data
+out/
+
 # Added by noteful
 /.Notes.md.bak
 /.wiki/
@@ -9,4 +12,7 @@
 # Python
 __pycache__/
 *.py[cod]
+
+# Jupyter
+.ipynb_checkpoints/
 

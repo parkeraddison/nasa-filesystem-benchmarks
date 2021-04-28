@@ -1,0 +1,61 @@
+IOR START
+    api=MPIIO
+    testFile=testFile
+    # hintsFileName=hintsFile
+    repetitions=5
+    # multiFile=0
+    # interTestDelay=5
+    readFile=1
+    writeFile=1
+    # filePerProc=0
+    # checkWrite=0
+    # checkRead=0
+    # keepFile=1
+    # quitOnError=0
+    segmentCount=1
+    blockSize=16m
+    # outlierThreshold=0
+    # setAlignment=1
+    transferSize=2m
+    # singleXferAttempt=0
+    # individualDataSets=0
+    # verbose=0
+    numTasks=8
+    # collective=1
+    # preallocate=0
+    # useFileView=0
+    # keepFileWithError=0
+    # setTimeStampSignature=0
+    # useSharedFilePointer=0
+    # useStridedDatatype=0
+    # uniqueDir=0
+    # fsync=0
+    # storeFileOffset=0
+    # maxTimeDuration=60
+    # deadlineForStonewalling=0
+    # useExistingTestFile=0
+    # useO_DIRECT=0
+    # showHints=0
+    # showHelp=0
+    summaryFile=IOR-blockSize-initial-sweep.json
+    summaryFormat=json
+RUN
+    blockSize=32m
+RUN
+    blockSize=64m
+RUN
+    blockSize=128m
+RUN
+    blockSize=256m
+RUN
+    blockSize=512m
+RUN
+    blockSize=1024m
+RUN
+    blockSize=2048m
+RUN
+    blockSize=4096m
+RUN
+    blockSize=8192m
+RUN
+IOR STOP
