@@ -1,0 +1,16 @@
+IOR START
+    api=MPIIO
+    repetitions=5
+    readFile=1
+    writeFile=1
+    segmentCount=1
+    blockSize=512m
+    transferSize=512k
+    #useExistingTestFile=1
+    #keepFile=1
+    summaryFile=IOR-numTasks-n2-prog.json
+    summaryFormat=json
+    numTasks=32
+    #testFile=FILE_tasks-n2-16
+RUN
+IOR STOP

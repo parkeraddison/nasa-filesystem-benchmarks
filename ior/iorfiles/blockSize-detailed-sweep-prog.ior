@@ -1,0 +1,35 @@
+IOR START
+    api=MPIIO
+    repetitions=5
+    readFile=1
+    writeFile=1
+    segmentCount=1
+    transferSize=1m
+    testFile=FILE_block-progressive
+    useExistingTestFile=0
+    keepFile=1
+    summaryFile=IOR-blockSize-detailed-sweep-prog.json
+    summaryFormat=json
+    blockSize=16m
+RUN
+    blockSize=32m
+RUN
+    blockSize=64m
+RUN
+    blockSize=128m
+RUN
+    blockSize=265m
+RUN
+    blockSize=512m
+RUN
+    blockSize=1g
+RUN
+    blockSize=1536m
+RUN
+    blockSize=2g
+RUN
+    blockSize=3g
+RUN
+    blockSize=4g
+RUN
+IOR STOP

@@ -1,0 +1,40 @@
+IOR START
+    api=MPIIO
+    testFile=FILE_transfer-collective
+    repetitions=5
+    readFile=1
+    writeFile=1
+    segmentCount=1
+    blockSize=512m
+    useExistingTestFile=1
+    keepFile=1
+    summaryFile=IOR-transferSize-collective-sweep.json
+    summaryFormat=json
+    #hintsFileName=iorfiles/hints.ior
+    #showHints=1
+    collective=1
+    transferSize=4k
+RUN
+    transferSize=16k
+RUN
+    transferSize=64k
+RUN
+    transferSize=256k
+RUN
+    transferSize=512k
+RUN
+    transferSize=1m
+RUN
+    transferSize=2m
+RUN
+    transferSize=4m
+RUN
+    transferSize=8m
+RUN
+    transferSize=16m
+RUN
+    transferSize=32m
+RUN
+    transferSize=64m
+RUN
+IOR STOP

@@ -1,0 +1,15 @@
+IOR START
+    api=MPIIO
+    testFile=testFile
+    repetitions=1
+    readFile=1
+    writeFile=1
+    blockSize=1m
+    transferSize=1m
+    segmentCount=1
+    showHints=1
+#    summaryFile=IOR-out.json
+#    summaryFormat=json
+#RUN
+#    transferSize=512k
+IOR STOP
