@@ -33,6 +33,8 @@ RUN cd darshan-3.3.0/darshan-runtime && \
     make && \
     make install
 
+# For the utilities, we also require Python (unstated requirement)
+RUN apt-get install python3
 RUN cd darshan-3.3.0/darshan-util && \
     ./configure && \
     make && \
