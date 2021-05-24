@@ -4,32 +4,37 @@
 # Each time we make a change to our Dockerfiles in PRP/docker/ we build the
 # images and push them to the Nautilus container repository.
 #
+# I tried getting away with multiple images in a single stage, but that didn't
+# quite work, so instead I'm using a separate stage for each image we want to
+# build and push.
+#
 image: gcr.io/kaniko-project/executor:debug
 
 stages:
-  - build-and-push
+  - kubempi-ior
+  - torch-darshan
 
-build-and-push-job:
-  stage: build-and-push
-  # Look for changes in our docker folder
-  #
-  # We can define a space-separated string of image names we want to build and
-  # push below.
+kubempi-ior:
+  stage: &NAME1 kubempi-ior
   variables:
     DOCKERFILES_DIR: PRP/docker
-    IMAGES: kubempi-ior torch-darshan
-  rules:
+    IMAGE_NAME: *NAME1
+  rules: &RULE
     - changes:
-        - $DOCKERFILES_DIR/Dockerfile.*
-  # Let's see if kaniko lets us do multiple images at once -- we may need to
-  # pass `--cleanup`...
-  script:
+        - $DOCKERFILES_DIR/Dockerfile.$IMAGE_NAME
+      when: always
+  script: &SCRIPT
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    # v This is a folded scalar which collapses the whitespace below.
     - >-
-      for img in $IMAGES; do
       /kaniko/executor --cache=true --context $CI_PROJECT_DIR
-      --dockerfile $CI_PROJECT_DIR/$DOCKERFILES_DIR/Dockerfile.${img}
-      --destination $CI_REGISTRY_IMAGE/${img}:${CI_COMMIT_SHA:0:8}
-      --destination $CI_REGISTRY_IMAGE/${img}:latest
-      ; done
+      --dockerfile $CI_PROJECT_DIR/$DOCKERFILES_DIR/Dockerfile.$IMAGE_NAME
+      --destination $CI_REGISTRY_IMAGE/$IMAGE_NAME:${CI_COMMIT_SHA:0:8}
+      --destination $CI_REGISTRY_IMAGE/$IMAGE_NAME:latest
+
+torch-darshan:
+  stage: &NAME2 torch-darshan
+  variables:
+    DOCKERFILES_DIR: PRP/docker
+    IMAGE_NAME: *NAME2
+  rules: *RULE
+  script: *SCRIPT
