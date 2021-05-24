@@ -13,11 +13,11 @@ build-and-push-job:
   stage: build-and-push
   # Look for changes in our docker folder
   #
-  # The base image is golang, so we should have access to bash and be able to
-  # define an array of the images we're interested in.
+  # We can define a space-separated string of image names we want to build and
+  # push below.
   variables:
     DOCKERFILES_DIR: PRP/docker
-    IMAGES: ( kubempi-ior torch-darshan )
+    IMAGES: kubempi-ior torch-darshan
   rules:
     - changes:
         - $DOCKERFILES_DIR/Dockerfile.*
@@ -27,7 +27,7 @@ build-and-push-job:
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
     # v This is a folded scalar which collapses the whitespace below.
     - >-
-      for img in "${IMAGES[@]}"; do
+      for img in $IMAGES; do
       /kaniko/executor --cache=true --context $CI_PROJECT_DIR
       --dockerfile $CI_PROJECT_DIR/$DOCKERFILES_DIR/Dockerfile.${img}
       --destination $CI_REGISTRY_IMAGE/${img}:${CI_COMMIT_SHA:0:8}
