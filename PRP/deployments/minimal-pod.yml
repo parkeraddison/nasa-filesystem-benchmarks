@@ -1,0 +1,30 @@
+# Minimal pod
+# ==================
+#
+# Launch a very minimal pod connect to a storage mount.
+#
+apiVersion: v1
+kind: Pod
+metadata:
+  name: &NAME pod-minimal
+spec:
+  containers:
+  - name: *NAME
+    image: parkeraddison/kube-openmpi-ior
+    args: ["sleep", "36500000"]
+    resources:
+      limits: &RESOURCES
+        cpu: 1
+        memory: 1G
+      requests: *RESOURCES
+    volumeMounts:
+    - mountPath: /data
+      name: &VOLNAME shared-cephfs
+  restartPolicy: Never
+  volumes:
+    - name: *VOLNAME
+      persistentVolumeClaim:
+        claimName: *VOLNAME
+# --- Specify node selection/affinities here --------------------------------- #
+  nodeSelector:
+    topology.kubernetes.io/zone: ucsd

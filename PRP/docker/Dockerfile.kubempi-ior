@@ -29,7 +29,7 @@ RUN cd darshan-3.3.0/darshan-runtime && \
     ./configure --with-log-path=${darshan_log_dir} --with-jobid-env=NONE && \
     mkdir -p ${darshan_log_dir} && \
     chmod +x darshan-mk-log-dirs.pl && \
-    darshan-mk-log-dirs.pl && \
+    ./darshan-mk-log-dirs.pl && \
     make && \
     make install
 
