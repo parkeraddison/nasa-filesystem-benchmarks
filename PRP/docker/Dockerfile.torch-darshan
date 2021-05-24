@@ -1,0 +1,41 @@
+# Darshan, TOKIO
+# ==============
+#
+FROM pytorch/pytorch:1.8.1-cuda11.1-cudnn8-runtime
+
+RUN apt-get update && apt-get install -y \
+    gcc \
+    git \
+    make \
+    wget \
+    zlib1g-dev
+
+RUN wget -O- ftp://ftp.mcs.anl.gov/pub/darshan/releases/darshan-3.3.0.tar.gz \
+    | tar zxf -
+
+ENV darshan_log_dir=/data/darshan-logs
+
+RUN cd darshan-3.3.0/darshan-runtime && \
+    ./configure --with-log-path=${darshan_log_dir} --with-jobid-env=NONE && \
+    mkdir -p ${darshan_log_dir} && \
+    chmod +x darshan-mk-log-dirs.pl && \
+    darshan-mk-log-dirs.pl && \
+    make && \
+    make install
+
+RUN cd darshan-3.3.0/darshan-util && \
+    ./configure && \
+    make && \
+    make install
+
+RUN cd darshan-3.3.0/darshan-util/pydarshan && \
+    python setup.py install
+
+# TODO: PyTOKIO uses a config file when installed - we should edit that.
+RUN wget -O- https://github.com/NERSC/pytokio/releases/download/v0.13.0/pytokio-0.13.0.tar.gz \
+    | tar zxf - && \
+    cd pytokio-0.13.0 && \
+    pip install .
+
+
+
