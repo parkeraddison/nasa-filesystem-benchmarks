@@ -48,3 +48,4 @@ RUN apt-get update && apt-get install -y \
 # Create an alias for running mpiexec
 RUN echo "alias omexec='mpiexec --allow-run-as-root --hostfile /kube-openmpi/generated/hostfile'" \
     >> ~/.bashrc
+
