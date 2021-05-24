@@ -6,26 +6,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: deploy-seaweedfs
+  name: &NAME deploy-cephfs
 spec:
   selector:
     matchLabels:
-      app: deploy-seaweedfs
+      app: *NAME
   template:
     metadata:
       labels:
-        app: deploy-seaweedfs
+        app: *NAME
     spec:
       containers:
-      - name: container-seaweedfs
-        image: parkeraddison/kube-openmpi-ior
+      - name: *NAME
+        image: parkeraddison/kube-openmpi-ior:0.7.0
         resources:
-          limits:
-            memory: "8Gi"
-            cpu: "8"
-          requests:
-            memory: "8Gi"
-            cpu: "8"
+          limits: &RESOURCES
+            cpu: 2
+            memory: 4Gi
+          requests: *RESOURCES
+            # memory: "8Gi"
+            # cpu: "8"
         ports:
         - containerPort: 80
         tty: true
@@ -33,12 +33,12 @@ spec:
         args: [-c, sleep 999d]
 # --- Change the lines below to test different storage types ----------------- #
         volumeMounts:
-          - name: shared-seaweedfs
-            mountPath: /storage
+          - name: &VOLNAME shared-cephfs
+            mountPath: /data
       volumes:
-      - name: shared-seaweedfs
+      - name: *VOLNAME
         persistentVolumeClaim:
-          claimName: shared-seaweedfs
+          claimName: *VOLNAME
 # --- Specify node selection/affinities here --------------------------------- #
       nodeSelector:
         topology.kubernetes.io/zone: ucsd

@@ -46,30 +46,43 @@ To support running multi-node MPI jobs on the Nautilus cluster, we're using [eve
 
 ### Setup
 
-1. Install [Helm](https://helm.sh/docs/intro/quickstart/)
+1. Install [Helm]
 2. Clone kube-openmpi and in the directory run `./gen-ssh-key.sh`
 3. Edit `values.yaml` with your desired image and resource requests
 4. Add the rolebinding
-  ```sh
-  KUBE_NAMESPACE=my_namespace
-  kubectl create -n $KUBE_NAMESPACE -f https://gitlab.com/ucsd-prp/prp_k8s_config/-/raw/master/mpi/rolebindings.yaml
-  ```
+    ```sh
+    KUBE_NAMESPACE=my_namespace
+    kubectl create -n $KUBE_NAMESPACE -f https://gitlab.com/ucsd-prp/prp_k8s_config/-/raw/master/mpi/rolebindings.yaml
+    ```
 5. Generate the kube resource yamls and deploy them on the cluster
-  ```sh
-  helm template nautilus chart -n $KUBE_NAMESPACE -f values.yaml -f ssh-key.yaml | kubectl -n $KUBE_NAMESPACE create -f -
-  # or, while working directory is PRP/
-  make openmpi
-  ```
+    ```sh
+    # While working directory is PRP/
+    make openmpi
+    # Or, run the command yourself
+    helm template nautilus chart -n $KUBE_NAMESPACE -f values.yaml -f ssh-key.yaml | kubectl -n $KUBE_NAMESPACE create -f -
+    ```
 
 ### Running
 
 Once all pods are running, you can use `kubectl exec` to run `mpiexec` from the master node.
 ```sh
+# Using the alias defined in the dockerfile
+kubectl exec -it nautilus-master -- omexec -npernode 1 -np 4 ior
+# or, run the command yourself
 kubectl exec -it nautilus-master -- mpiexec --allow-run-as-root --hostfile /kube-openmpi/generated/hostfile --display-map -n 4 -npernode 1 ior
 ```
 
-<!-- Links -->
+## References
+- [IOR]
+- [FIO]
+- [IO500]
+- [kube-openmpi]
+- [mpiexec]
+- [Helm]
+
 [ior]: https://github.com/hpc/ior
 [fio]: https://fio.readthedocs.io/en/latest/fio_doc.html#job-file-format
 [io500]: https://www.vi4io.org/io500/
 [kube-openmpi]: https://github.com/everpeace/kube-openmpi
+[mpiexec]: https://linux.die.net/man/1/mpiexec
+[helm]: https://helm.sh/docs/intro/quickstart/

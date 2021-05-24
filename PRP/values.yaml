@@ -33,24 +33,27 @@ mpiMaster:
   #       --display-map -n 4 -npernode 1 \
   #       sh -c 'echo $(hostname):hello'
   resources:
-    limits:
-      cpu: 8
+    # NOTE: Resources are shared as limits and requests for the master and all
+    # worker nodes.
+    limits: &RESOURCES
+      cpu: 2
       memory: 8Gi
-    requests:
-      cpu: 8
-      memory: 8Gi
+    requests: *RESOURCES
+      # cpu: 
+      # memory: 8Gi
   nodeSelector:
     topology.kubernetes.io/zone: ucsd
   tolerations: []
   affinity: {}
-  volumes:
-    # NOTE: Change all name occurences to change filesystem being used
-    - name: shared-seaweedfs
+  # NOTE: Change all name occurences to change filesystem being used. Volumes
+  # and mounts are shared for the master and all worker nodes.
+  volumes: &VOLUMES
+    - name: &VOLNAME shared-cephfs
       persistentVolumeClaim:
-        claimName: shared-seaweedfs
-  volumeMounts:
-    - mountPath: /shared
-      name: shared-seaweedfs
+        claimName: *VOLNAME
+  volumeMounts: &MOUNTS
+    - mountPath: /data
+      name: *VOLNAME
 
 mpiWorkers:
   num: 3
@@ -63,42 +66,11 @@ mpiWorkers:
   #   podDisruptionBudget:
   #     enabled: true
   resources:
-    limits:
-      cpu: 8
-      memory: 8Gi
-    requests:
-      cpu: 8
-      memory: 8Gi
+    limits: *RESOURCES
+    requests: *RESOURCES
   nodeSelector:
-    topology.kubernetes.io/zone: ucsd28Mi
-    #  gpu: 1
-  nodeSelector: {}
+    topology.kubernetes.io/zone: ucsd
   tolerations: []
   affinity: {}
-  volumes:
-    - name: shared-seaweedfs
-      persistentVolumeClaim:
-        claimName: shared-seaweedfs
-  volumeMounts:
-    - mountPath: /shared
-      name: shared-seaweedfs
-
-appCodesToSync:
-# - name: chainermn
-#   gitRepo: https://github.com/chainer/chainermn.git
-#   gitBranch: master
-#   fetchWaitSecond: "120"
-#   mountPath: /chainermn-examples
-#   subPath: chainermn/examples
-# - name: chainer
-#   gitRepo: https://github.com/chainer/chainer.git
-#   gitBranch: master
-#   fetchWaitSecond: "120"
-#   mountPath: /chainer-examples
-#   subPath: chainer/examples
-# - name: your-secret-repo
-#   gitRepo: git@github.com:your-org/your-secret-repo.git
-#   gitBranch: master
-#   fetchWaitSecond: "120"
-#   mountPath: /your-secret-repo
-#   gitSecretName: git-sync-creds
+  volumes: *VOLUMES
+  volumeMounts: *MOUNTS

@@ -8,3 +8,35 @@ RUN wget -O- https://github.com/hpc/ior/releases/download/3.3.0/ior-3.3.0.tar.gz
     ./configure && \
     make && \
     make install
+
+# Download and extract Darshan, then configure and install. We also need zlib
+# headers to successfully configure Darshan -- these need the dev version. F
+#
+# We need the dev version of zlib in orde to get the headers, and it seems that
+# we also need Python for darshan-util.
+RUN apt-get update && apt-get install -y \
+    zlib1g-dev
+RUN wget -O- ftp://ftp.mcs.anl.gov/pub/darshan/releases/darshan-3.3.0.tar.gz \
+    | tar zxf -
+# We can specify the darshan logs path to wherever we like, but the jobid-env
+# depends on what kind of system or scheduler we're using.
+# TODO: Is NONE correct? if so, explain why
+ENV darshan_log_dir=/data/darshan-logs
+RUN cd darshan-3.3.0/darshan-runtime && \
+    ./configure --with-log-path=${darshan_log_dir} --with-jobid-env=NONE && \
+    mkdir -p ${darshan_log_dir} && darshan-mk-log-dirs.pl && \
+    make && \
+    make install
+RUN cd darshan-3.3.0/darshan-util && \
+    ./configure && \
+    make && \
+    make install
+
+# Additional useful utilities
+RUN apt-get update && apt-get install -y \
+    git \
+    vim
+
+# Create an alias for running mpiexec
+RUN echo "alias omexec='mpiexec --allow-run-as-root --hostfile /kube-openmpi/generated/hostfile'" \
+    >> ~/.bashrc

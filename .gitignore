@@ -1,5 +1,6 @@
 # Ignore data
 out/
+data/
 
 # Added by noteful
 /.Notes.md.bak
@@ -15,4 +16,7 @@ __pycache__/
 
 # Jupyter
 .ipynb_checkpoints/
+
+# VS Code
+.vscode/
 
