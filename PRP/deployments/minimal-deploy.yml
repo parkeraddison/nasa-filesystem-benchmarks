@@ -6,7 +6,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: &NAME deploy-cephfs
+  name: &NAME deploy-flight
 spec:
   selector:
     matchLabels:
@@ -18,11 +18,12 @@ spec:
     spec:
       containers:
       - name: *NAME
-        image: parkeraddison/kube-openmpi-ior:0.7.0
+        image: gitlab-registry.nautilus.optiputer.net/parkeraddison/filesystem-benchmarks/torch-darshan
         resources:
           limits: &RESOURCES
-            cpu: 2
-            memory: 4Gi
+            cpu: 1
+            memory: 2Gi
+            nvidia.com/gpu: 0
           requests: *RESOURCES
             # memory: "8Gi"
             # cpu: "8"

@@ -1,5 +1,5 @@
-# Darshan, TOKIO
-# ==============
+# PyTorch, Darshan
+# ================
 #
 FROM pytorch/pytorch:1.8.1-cuda11.1-cudnn8-runtime
 
@@ -23,13 +23,18 @@ RUN cd darshan-3.3.0/darshan-runtime && \
     make && \
     make install
 
+# To allow us to use PyDarshan, we should configure this with specific options.
 RUN cd darshan-3.3.0/darshan-util && \
-    ./configure && \
+    ./configure --enable-pydarshan --enable-shared && \
     make && \
     make install
 
 RUN cd darshan-3.3.0/darshan-util/pydarshan && \
     python setup.py install
+
+# In order to actually make use of PyDarshan plots an IPython environment is
+# implied. We'll use jupyter.
+RUN pip install jupyter
 
 # TODO: PyTOKIO uses a config file when installed - we should edit that.
 RUN wget -O- https://github.com/NERSC/pytokio/releases/download/v0.13.0/pytokio-0.13.0.tar.gz \
@@ -37,3 +42,9 @@ RUN wget -O- https://github.com/NERSC/pytokio/releases/download/v0.13.0/pytokio-
     cd pytokio-0.13.0 && \
     pip install .
 
+# Aliases and utilities.
+#
+# For observing applications with Darshan
+RUN echo "alias darsharb='env DARSHAN_ENABLE_NONMPI= LD_PRELOAD=/usr/local/lib/libdarshan.so' \
+        alias darhmpi='env LD_PRELOAD=usr/local/lib/libdarshan.so'" \
+    >> ~/.bashrc
