@@ -45,6 +45,6 @@ RUN wget -O- https://github.com/NERSC/pytokio/releases/download/v0.13.0/pytokio-
 # Aliases and utilities.
 #
 # For observing applications with Darshan
-RUN echo "alias darsharb='env DARSHAN_ENABLE_NONMPI= LD_PRELOAD=/usr/local/lib/libdarshan.so' \
-        alias darhmpi='env LD_PRELOAD=usr/local/lib/libdarshan.so'" \
+RUN printf "alias darshany='env DARSHAN_ENABLE_NONMPI= LD_PRELOAD=/usr/local/lib/libdarshan.so'\n\
+            alias darshmpi='env LD_PRELOAD=usr/local/lib/libdarshan.so'" \
     >> ~/.bashrc
