@@ -6,7 +6,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: &NAME deploy-flight
+  name: &NAME deploy-torch
 spec:
   selector:
     matchLabels:
@@ -18,15 +18,14 @@ spec:
     spec:
       containers:
       - name: *NAME
+        # image: gitlab-registry.nautilus.optiputer.net/parkeraddison/filesystem-benchmarks/kubempi-ior
         image: gitlab-registry.nautilus.optiputer.net/parkeraddison/filesystem-benchmarks/torch-darshan
         resources:
           limits: &RESOURCES
-            cpu: 1
-            memory: 2Gi
+            cpu: 4
+            memory: 4Gi
             nvidia.com/gpu: 0
           requests: *RESOURCES
-            # memory: "8Gi"
-            # cpu: "8"
         ports:
         - containerPort: 80
         tty: true

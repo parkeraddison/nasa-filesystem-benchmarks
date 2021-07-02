@@ -1,15 +1,118 @@
 NAS HECC
 ========
 
-The NAS High-End Computing Capability (HECC) Project uses an [HPC environment with a separate front-end and compute nodes](https://www.nas.nasa.gov/hecc/support/kb/hpc-environment-overview_25.html). The process to run a benchmark is the following:
+- [Getting started](#getting-started)
+  - [Running code](#running-code)
+  - [Dependencies](#dependencies)
+- [Development](#development)
+  - [VNC Desktop](#vnc-desktop)
+  - [Jupyter Notebooks](#jupyter-notebooks)
+  - [Transferring files](#transferring-files)
+- [Old](#old)
+- [Benchmark script](#benchmark-script)
+- [Running](#running)
+  - [On NFS](#on-nfs)
+  - [On Lustre](#on-lustre)
+  - [Parameter sweep configuration](#parameter-sweep-configuration)
+  - [Checking the status of your job](#checking-the-status-of-your-job)
+- [Output](#output)
+  - [Parsing and visualizing output](#parsing-and-visualizing-output)
+
+## Getting started
+
+The NAS-operated High-End Computing Capability (HECC) Project uses an [HPC environment with a separate front-end and compute nodes](https://www.nas.nasa.gov/hecc/support/kb/hpc-environment-overview_25.html). To do anything, first remote into a front-end node, either the general secure front end `ssh sfe` or directly to a Pleiades front end `ssh pfe` (preferred).
+
+First time working with NAS should see https://www.nas.nasa.gov/hecc/support/kb/new-user-orientation-161/.
+
+### Running code
+
+We can run some code on a front end node, like compiling software, moving items about, and launching a VNC desktop environment. However, when its time to run an intensive application, it's best to use a compute node. This can be done by using a PBS job, PBS interactive session, or requesting a dedicated compute node.
+
+- [PBS Jobs and Interactive sessions](https://www.nas.nasa.gov/hecc/support/kb/pbs-on-pleiades-122/)
+  - `qsub -N UsesJobScript -l select=1:model=san:ncpus=1 -q devel`
+  - `qsub -I -q devel`
+- [Dedicated compute nodes](https://www.nas.nasa.gov/hecc/support/kb/reserving-a-dedicated-compute-node_556.html)
+  - `pbs_rfe --model san --duration 3`
+
+### Dependencies
+
+Software dependencies are typically loaded via modules.
+
+- [Software modules](https://www.nas.nasa.gov/hecc/support/kb/using-software-modules_115.html)
+  - `module load mpi-hpe`
+  - `module load pkgsrc` (see https://www.nas.nasa.gov/hecc/support/kb/software-on-nas-systems_116.html)
+
+## Development
+
+### VNC Desktop
+
+A VNC desktop environment can be run from any node to provide a graphical interface -- very helpful for things like viewing images or pdfs, or doing manual file reorganization/renaming that would be tedious on the command line.
+
+```bash
+vncserver -localhost
+# "New desktop is at pfe:XX"
+# Port-forward. ~C will escape to the ssh shell
+~C
+-L 59XX:localhost:59XX
+
+# On local machine, use VNC client to connect to localhost:59XX
+
+# When finished
+vncserver -kill :XX
+```
+
+- [VNC documentation](https://www.nas.nasa.gov/hecc/support/kb/vnc-a-faster-alternative-to-x11_257.html)
+
+### Jupyter Notebooks
+
+The de-facto method of developing, visualizing, and sometimes even running Python code is (should be) through Jupyter notebooks. A Jupyter Lab enviroment allows you to run an integrated terminal and view multiple files at once. Jupyter must be run from a compute node, either from an interactive PBS session or a reserved node.
+
+First time working with Jupyter on NAS should see https://www.nas.nasa.gov/hecc/support/kb/secure-setup-for-using-jupyter-notebook-on-nas-systems_622.html
+
+```bash
+qsub -I -l select=1:model=san:ncpus=8 # Use `-q devel` if you'll be working for under 2 hours
+# Note the pfeXX number and the rXX node name
+module use -a /swbuild/analytix/tools/modulefiles
+module load miniconda3/v4
+source activate pyt1_8 # PyTorch; Can use other conda environments,
+jupyter lab --no-browser
+```
+
+On the local machine, we must ssh directly to the compute node in order to access Jupyter
+```bash
+function nasjupyter {
+    ssh -o "StrictHostKeyChecking ask" -L 8888:localhost:8888 -o ProxyJump=sfe,"$1" "$2"
+}
+
+nasjupyter pfeXX rXX
+```
+
+Now, go to `https://localhost:8888` in a browser, accept the unverified certificate warning (some browsers don't show this... I had the best luck with Firefox), and then finally go on and use Jupyter!
+
+- [Jupyter for machine learning on NAS](https://www.nas.nasa.gov/hecc/support/kb/using-jupyter-notebook-for-machine-learning-development-on-nas-systems_576.html)
+- [Conda environments](https://www.nas.nasa.gov/hecc/support/kb/machine-learning-overview_572.html)
+
+### Transferring files
+
+Front end nodes have internet access, so tools like `wget` or `git` can be used to download datasets or software. To transfer files to and from the local system, a few tools can be used, including `scp` (small files) and `shift` (massive files).
+
+- [Remote transfers documentation](https://www.nas.nasa.gov/hecc/support/kb/remote-file-transfer-commands_142.html)
+  - `scp file_to_upload pfe:path_for_file`
+  - `scp -r pfe:directory_to_download path_for_directory`
+
+---
+Old
+---
+
+## Benchmark script
+
+ The process to run a benchmark is the following:
 1. Create a script to load dependencies and run the benchmark
 2. Submit the benchmark script as a batch job using the Portable Batch System (PBS)
 
 There are multiple supercomputers within the NAS HPC environment. For now, only **Pleiades** is being explored.
 
 You will need to have an NAS account and have access to the secure enclave to do anything. See https://www.nas.nasa.gov/hecc/support/kb/
-
-## Benchmark script
 
 A script is responsible for loading any software dependencies and running the actual commands -- in this case, loading openmpi-related modules and executing the IOR benchmark.
 
@@ -51,7 +154,7 @@ qsub ~/path/to/ior-script.sh
 
 ### Parameter sweep configuration
 
-To run a parameter sweep, create a job json as seen in [`/ior`](/ior) and submit `ior-sweep.sh` with an environment variable named IORFILE which points to that jobfile. Optionally override PBS directives (the queue, the number of resources selected, the job name, etc).
+To run a parameter sweep, create a job json as seen in [/benchmarks/ior/](/benchmarks/ior/) and submit `ior-sweep.sh` with an environment variable named IORFILE which points to that jobfile. Optionally override PBS directives (the queue, the number of resources selected, the job name, etc).
 
 For example, the following command will submit a job from a make-believe job json in the current directory, while also changing the PBS job name and resource selection.
 ```bash
@@ -152,7 +255,7 @@ ____________________________________________________________________
 
 ### Parsing and visualizing output
 
-The functions provided in `../ior/parse_output.py` can be used to quickly parse and plot the output ('o') files resulting from an IOR test or parameter sweep run as a PBS job. The following code loads in the data and plots a desired value versus the swept parameter.
+The functions provided in benchmarks/ior/parse_output.py can be used to quickly parse and plot the output ('o') files resulting from an IOR test or parameter sweep run as a PBS job. The following code loads in the data and plots a desired value versus the swept parameter.
 ```python
 from parse_output.py import *
 
