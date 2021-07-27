@@ -13,6 +13,7 @@ image: gcr.io/kaniko-project/executor:debug
 stages:
   - kubempi-ior
   - torch-darshan
+  - tf-darshan
 
 kubempi-ior:
   stage: &NAME1 kubempi-ior
@@ -36,5 +37,13 @@ torch-darshan:
   variables:
     DOCKERFILES_DIR: PRP/docker
     IMAGE_NAME: *NAME2
+  rules: *RULE
+  script: *SCRIPT
+
+tf-darshan:
+  stage: &NAME3 tf-darshan
+  variables:
+    DOCKERFILES_DIR: PRP/docker
+    IMAGE_NAME: *NAME3
   rules: *RULE
   script: *SCRIPT
