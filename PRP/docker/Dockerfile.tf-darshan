@@ -1,7 +1,7 @@
 # TensorFlow, Darshan
 # ================
 #
-FROM tensorflow/tensorflow
+FROM jupyter/tensorflow-notebook
 
 RUN apt-get update && apt-get install -y \
     gcc \
@@ -31,10 +31,6 @@ RUN cd darshan-3.3.1/darshan-util && \
 
 RUN cd darshan-3.3.1/darshan-util/pydarshan && \
     python setup.py install
-
-# In order to actually make use of PyDarshan plots an IPython environment is
-# implied. We'll use jupyter.
-RUN pip install jupyter
 
 # Aliases and utilities.
 #
