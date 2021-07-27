@@ -1,0 +1,24 @@
+# Just write the files to be read by another node or at a later time (e.g. after
+# dropping the page cache)
+#
+IOR START
+    api=POSIX
+    filePerProc=1
+    repetitions=100
+    multiFile=1
+    segmentCount=1
+    readFile=0
+    writeFile=1
+    useO_DIRECT=1
+    keepFile=1
+    summaryFormat=json
+# ---
+    testFile=FILE_256k
+    transferSize=256k
+    blockSize=256k
+RUN
+    testFile=FILE_4m
+    transferSize=4m
+    blockSize=4m
+RUN
+IOR STOP

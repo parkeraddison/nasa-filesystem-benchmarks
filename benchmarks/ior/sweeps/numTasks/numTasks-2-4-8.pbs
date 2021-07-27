@@ -1,0 +1,52 @@
+#PBS -N NumTasks2-4-8
+#PBS -j oe
+#PBS -l select=1:model=san:ncpus=2+1:model=san:ncpus=4+1:model=san:ncpus=8
+#PBS -l place=scatter
+
+module load mpi-hpe
+
+#cd /nobackupp12/paddison/benchmarks
+# default/ has default Lustre striping (progressive)
+# stripe1/ has stripe size 1MiB and stripe count 1
+
+i=1
+
+exists() {
+    [ -e "$1" ]
+}
+
+# Get hosts
+mapfile -t hosts < $PBS_NODEFILE
+
+cd default/
+
+mpirun ${hosts[0]} -np 2 ~/bin/ior \
+    -O summaryFile=read-2task-default_$i.json \
+    -f ../read.ior
+mpirun ${hosts[1]} -np 4 ~/bin/ior \
+    -O summaryFile=read-4task-default_$i.json \
+    -f ../read.ior
+mpirun ${hosts[2]} -np 8 ~/bin/ior \
+    -O summaryFile=read-8task-default_$i.json \
+    -f ../read.ior
+
+
+# done
+
+cd ../stripe1/
+
+# for N in ${vals[@]}; do
+
+mpirun ${hosts[0]} -np 2 ~/bin/ior \
+    -O summaryFile=read-2task-stripe1_$i.json \
+    -f ../read.ior
+mpirun ${hosts[1]} -np 4 ~/bin/ior \
+    -O summaryFile=read-4task-stripe1_$i.json \
+    -f ../read.ior
+mpirun ${hosts[2]} -np 8 ~/bin/ior \
+    -O summaryFile=read-8task-stripe1_$i.json \
+    -f ../read.ior
+
+#     # Drop from page cache (hopefully this works...)
+#     dd of=FILE_* oflag=nocache conv=notrunc,fdatasync count=0
+# done

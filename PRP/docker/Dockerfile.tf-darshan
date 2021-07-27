@@ -1,0 +1,44 @@
+# TensorFlow, Darshan
+# ================
+#
+FROM tensorflow/tensorflow
+
+RUN apt-get update && apt-get install -y \
+    gcc \
+    git \
+    make \
+    wget \
+    zlib1g-dev
+
+RUN wget -O- ftp://ftp.mcs.anl.gov/pub/darshan/releases/darshan-3.3.1.tar.gz \
+    | tar zxf -
+
+ENV darshan_log_dir=/data/darshan-logs
+
+RUN cd darshan-3.3.1/darshan-runtime && \
+    ./configure --with-log-path=${darshan_log_dir} --with-jobid-env=NONE && \
+    mkdir -p ${darshan_log_dir} && \
+    chmod +x darshan-mk-log-dirs.pl && \
+    ./darshan-mk-log-dirs.pl && \
+    make && \
+    make install
+
+# To allow us to use PyDarshan, we should configure this with specific options.
+RUN cd darshan-3.3.1/darshan-util && \
+    ./configure --enable-pydarshan --enable-shared && \
+    make && \
+    make install
+
+RUN cd darshan-3.3.1/darshan-util/pydarshan && \
+    python setup.py install
+
+# In order to actually make use of PyDarshan plots an IPython environment is
+# implied. We'll use jupyter.
+RUN pip install jupyter
+
+# Aliases and utilities.
+#
+# For observing applications with Darshan
+RUN printf "alias darshany='env DARSHAN_ENABLE_NONMPI= LD_PRELOAD=/usr/local/lib/libdarshan.so'\n\
+            alias darshmpi='env LD_PRELOAD=usr/local/lib/libdarshan.so'" \
+    >> ~/.bashrc

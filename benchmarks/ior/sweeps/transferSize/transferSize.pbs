@@ -1,0 +1,32 @@
+#PBS -N TransferSizeIOR
+#PBS -j oe
+#PBS -l select=2:model=san:ncpus=2
+#PBS -l place=scatter
+
+module load mpi-hpe
+
+cd /nobackupp12/paddison/benchmarks
+# default/ has default Lustre striping (progressive)
+# stripe1/ has stripe size 1MiB and stripe count 1
+
+i=3
+
+exists() {
+    [ -e "$1" ]
+}
+if exists transferSize*_$i* && [ ! "${IOR_FORCE+1}" ]; then
+    echo "File already exists for this iter. Set -v IOR_FORCE to continue."
+    exit 1
+fi
+
+mpiexec -np 4 ~/bin/ior \
+    -o default/FILE_transfer \
+    -O summaryFile=transferSize-default_$i.json \
+    -f transferSize.ior
+
+mpiexec -np 4 ~/bin/ior \
+    -o stripe1/FILE_transfer \
+    -O summaryFile=transferSize-stripe1_$i.json \
+    -f transferSize.ior
+
+

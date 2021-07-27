@@ -1,0 +1,46 @@
+#PBS -N NumTasks64
+#PBS -j oe
+#PBS -l select=4:model=san:ncpus=16
+
+module load mpi-hpe
+
+# cd /nobackupp12/paddison/benchmarks/numTasks
+# default/ has default Lustre striping (progressive)
+# stripe1/ has stripe size 1MiB and stripe count 1
+
+i=1
+
+exists() {
+    [ -e "$1" ]
+}
+
+cd default/
+
+if exists read-*_$i* && [ ! "${IOR_FORCE+1}" ]; then
+    echo "File already exists for this iter. Set -v IOR_FORCE to continue."
+    exit 1
+fi
+
+# vals=(1 2 4 8 16)
+# for N in ${vals[@]}; do
+N=64
+
+mpiexec -np $N ~/bin/ior \
+    -O summaryFile=read-${N}task-default_$i.json \
+    -f ../read.ior
+    
+# done
+
+cd ../stripe1/
+
+# for N in ${vals[@]}; do
+
+mpiexec -np $N ~/bin/ior \
+    -O summaryFile=read-${N}task-stripe1_$i.json \
+    -f ../read.ior
+    
+#     # Drop from page cache (hopefully this works...)
+#     dd of=FILE_* oflag=nocache conv=notrunc,fdatasync count=0
+# done
+
+

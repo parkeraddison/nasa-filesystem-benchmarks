@@ -1,0 +1,96 @@
+# Transfer size comprehensive sweep
+# =================================
+#
+# Meant to get an understanding of how a filesystem handles different I/O access
+# sizes.
+#
+# The minimum access size should be the page size, which can be found using
+# `getconf PAGESIZE`. The maximum access size, along with the step sizes depends
+# on the use case for the benchmarks.
+#
+# We are benchmarking I/O for machine learning use cases which typically have
+# very many small-medium sized files and ingest the entire file at once.
+# Therefore, each process will write/read its own file and block size (i.e. file
+# size) will be equal to transfer size.
+#
+# ~~To measure strong-scaling we should fix the total data volume. This means the
+# segment count (i.e. number of files per processor) should be adjusted such
+# that `segmentCount * transferSize * numTasks` is roughly equal for each test.~~
+#
+# To replicate application I/O of many small files, we'll use multiple
+# iterations with the multiFile option.
+#
+IOR START
+    api=POSIX
+    filePerProc=1
+    # Avoid page cache (requires >1 node)
+    reorderTasksConstant=1
+    # Two nodes, two tasks per node
+    numTasks=4
+    # Multiple small files
+    repetitions=100
+    multiFile=1
+    segmentCount=1
+    # Replicate random access (not needed when doing multiple file access)
+    #randomOffset=1
+    # Options to potentially override during invokation
+    #readFile=1
+    #writeFile=1
+    #testFile=FILE_transfer
+    #useExistingTestFile=0
+    #keepFile=0
+    #summaryFile=IOR-transferSize.json
+    summaryFormat=json
+# ---
+# Nodes: 2
+# NumTasks: 4 (2 per Node)
+# Volume: 32GiB (8GiB per Task)
+# TransferSize: 4k 16k 64k 256k 512k 1m 2m 4m 8m 16m
+# BlockSize: ""
+# SegmentCount: 32Gi / "" / 4
+# ---
+    transferSize=4k
+    blockSize=4k
+    #segmentCount=2097152
+RUN
+    transferSize=16k
+    blockSize=16k
+    #segmentCount=1398101
+RUN
+    transferSize=64k
+    blockSize=64k
+    #segmentCount=131072
+RUN
+    transferSize=256k
+    blockSize=256k
+    #segmentCount=32768
+RUN
+    transferSize=512k
+    blockSize=512k
+    #segmentCount=16384
+RUN
+    transferSize=1m
+    blockSize=1m
+    #segmentCount=8192
+RUN
+    transferSize=2m
+    blockSize=2m
+    #segmentCount=4096
+RUN
+    transferSize=4m
+    blockSize=4m
+    #segmentCount=2048
+RUN
+    transferSize=8m
+    blockSize=8m
+    #segmentCount=1024
+RUN
+    transferSize=16m
+    blockSize=16m
+    #segmentCount=512
+RUN
+    transferSize=32m
+    blockSize=32m
+    #segmentCount=256
+RUN
+IOR STOP
