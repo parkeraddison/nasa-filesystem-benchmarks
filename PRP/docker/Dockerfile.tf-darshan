@@ -38,7 +38,7 @@ RUN cd darshan-3.3.1/darshan-util/pydarshan && \
 RUN git clone https://github.com/parkeraddison/delta && \
     apt-get update && apt-get install -y g++ && \
     cd delta && \
-    ./scripts/setup.py && \
+    ./scripts/setup.sh && \
     pip install tensorflow && \
     pip install .
 
