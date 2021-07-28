@@ -36,7 +36,6 @@ RUN cd darshan-3.3.1/darshan-util/pydarshan && \
 # DELTA
 # RUN git clone https://github.com/nasa/delta && \
 RUN git clone https://github.com/parkeraddison/delta && \
-    conda deactivate && \
     apt-get update && apt-get install g++ && \
     cd delta && \
     ./scripts/setup.py && \
